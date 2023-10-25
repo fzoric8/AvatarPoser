@@ -13,11 +13,10 @@ import time
 import copy
 import pickle
 
-
-dataroot_amass ="amass" # root of amass dataset
+dataroot_amass ="./data"  # root of amass dataset
 
 for dataroot_subset in ["MPI_HDM05", "BioMotionLab_NTroje", "CMU"]:
-    print(dataroot_subset)
+    print("Current dataroot subset is: {}".format(dataroot_subset))
     for phase in ["train","test"]:
         print(phase)
         savedir = os.path.join("./data_fps60", dataroot_subset, phase)
@@ -29,7 +28,8 @@ for dataroot_subset in ["MPI_HDM05", "BioMotionLab_NTroje", "CMU"]:
         with open(split_file, 'r') as f:
             filepaths = [line.rstrip('\n') for line in f]
 
-
+        print(dataroot_subset)
+        print(filepaths)
         rotation_local_full_gt_list = []
 
         hmd_position_global_full_gt_list = []
@@ -37,7 +37,6 @@ for dataroot_subset in ["MPI_HDM05", "BioMotionLab_NTroje", "CMU"]:
         body_parms_list = []
 
         head_global_trans_list = []
-
 
         support_dir = 'support_data/'
         bm_fname_male = os.path.join(support_dir, 'body_models/smplh/{}/model.npz'.format('male'))
@@ -55,7 +54,9 @@ for dataroot_subset in ["MPI_HDM05", "BioMotionLab_NTroje", "CMU"]:
         idx = 0
         for filepath in filepaths:
             data = dict()
-            bdata = np.load(filepath,allow_pickle=True)
+            filepath_ = "{}/{}".format(dataroot_amass, filepath)
+            print(filepath_)
+            bdata = np.load(filepath_ ,allow_pickle=True)
             # print(list(bdata.keys())) ### check keys of body data: ['trans', 'gender', 'mocap_framerate', 'betas', 'dmpls', 'poses']
             try:
                 framerate = bdata["mocap_framerate"]
@@ -122,9 +123,6 @@ for dataroot_subset in ["MPI_HDM05", "BioMotionLab_NTroje", "CMU"]:
 
         #            embed()
             head_global_trans_list = head_global_trans[1:]
-
-
-
 
             num_frames = position_global_full_gt_world.shape[0]-1
 
