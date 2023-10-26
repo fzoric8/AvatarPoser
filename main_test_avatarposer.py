@@ -16,7 +16,7 @@ import pickle
 from utils import utils_visualize as vis
 
 
-save_animation = False
+save_animation = True
 resolution = (800,800)
 
 def main(json_path='options/test_avatarposer.json'):
@@ -127,10 +127,9 @@ def main(json_path='options/test_avatarposer.json'):
         gt_position = body_parms_gt['position']
         gt_body = body_parms_gt['body']
 
-
-
         if index in [0, 10, 20] and save_animation:
             video_dir = os.path.join(opt['path']['images'], str(index))
+            logger.info("Video dir is: {}".format(video_dir))
             if not os.path.exists(video_dir):
                 os.makedirs(video_dir)
 

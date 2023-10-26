@@ -15,7 +15,10 @@ import pickle
 
 dataroot_amass ="./data"  # root of amass dataset
 
-for dataroot_subset in ["MPI_HDM05", "BioMotionLab_NTroje", "CMU"]:
+dataset_list = ["MPI_HDM05", "BioMotionLab_NTroje", "CMU"]
+dataset_list_ = ["CMU"]
+
+for dataroot_subset in dataset_list_: 
     print("Current dataroot subset is: {}".format(dataroot_subset))
     for phase in ["train","test"]:
         print(phase)
