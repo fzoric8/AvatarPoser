@@ -13,11 +13,62 @@ from data.select_dataset import define_Dataset
 from models.select_model import define_Model
 from utils import utils_transform
 import pickle
+from datetime import datetime
 from utils import utils_visualize as vis
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 
 save_animation = True
+debug_plot = True
 resolution = (800,800)
+
+def check_dict_tensors(dict_input): 
+    for key, value in dict_input.items():
+    # Check if the value is a tensor
+        if isinstance(value, torch.Tensor):
+            # If it's a tensor, print its dimensions
+            print(f"Key: {key}, Type: {type(value)}, Dimensions: {value.size()}")
+        else:
+            # If it's not a tensor, print its type
+            print(f"Key: {key}, Type: {type(value)}")
+
+
+def plot_pose(tensor, k_step):
+    # Check if the tensor has the expected dimensions
+    #if len(tensor.size()) != 3 or tensor.size(2) != 3:
+    #    raise ValueError("Input tensor should have dimensions [N, 22, 3]")
+
+    # Number of samples (N) and number of points (22)
+    N, num_points, _ = tensor.size()
+
+
+
+    # Plot for each k_step
+    for i in range(0, N, k_step):
+            # Create a 3D plot
+        print("Current k is: {}".format(i))
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        # Extract the points for the current step
+        points = tensor[i]
+
+        # Plot each point
+        for j in range(num_points):
+            x, y, z = points[j]
+            ax.scatter(x, y, z, label=f'Point {j+1}')
+
+        # Set plot labels and title
+        ax.set_xlabel('X-axis')
+        ax.set_ylabel('Y-axis')
+        ax.set_zlabel('Z-axis')
+        ax.set_title('3D Pose Plot - Step {0}'.format(i))
+
+        # Show legend and plot
+        ax.legend()
+        plt.show()
+
+
 
 def main(json_path='options/test_avatarposer.json'):
 
@@ -110,19 +161,28 @@ def main(json_path='options/test_avatarposer.json'):
     vel_error = []
     pos_error_hands = []
     for index, test_data in enumerate(test_loader):
-        if index > 3: 
+        if index > 5: 
     	    break
         logger.info("testing the sample {}/{}".format(index, len(test_loader)))
         
         # Evaluate present test data 
-        print(test_data)
+        #print("Keys of the test data are: {}".format(test_data.keys()))
+        #print("Test data type is:", type(test_data))
+        #print("Test data is: ", test_data)
+        #print("Test data size is: ", len(test_data))
+        check_dict_tensors(test_data)
+        check_dict_tensors(test_data['P'])
+
+        # Get the current time
+        current_time = datetime.now()
 
         model.feed_data(test_data, test=True)
 
         model.test()
 
         body_parms_pred = model.current_prediction()
-        print("body params gt: {}".format(body_params_pred))
+        #print("body params gt: {}".format(body_parms_pred))
+
         body_parms_gt = model.current_gt()
         predicted_angle = body_parms_pred['pose_body']
         predicted_position = body_parms_pred['position']
@@ -131,6 +191,14 @@ def main(json_path='options/test_avatarposer.json'):
         gt_angle = body_parms_gt['pose_body']
         gt_position = body_parms_gt['position']
         gt_body = body_parms_gt['body']
+
+        print("================================")
+        check_dict_tensors(body_parms_pred)
+
+        # Calculate the time difference
+        time_difference = datetime.now() - current_time
+        time_difference_seconds = time_difference.total_seconds()
+       
 
         if index in [0, 10, 20] and save_animation:
             video_dir = os.path.join(opt['path']['images'], str(index))
@@ -147,7 +215,14 @@ def main(json_path='options/test_avatarposer.json'):
 
 
         predicted_position = predicted_position#.cpu().numpy()
+
+        if debug_plot:
+            plot_pose(predicted_position.cpu(), 100)
+
         gt_position = gt_position#.cpu().numpy()
+
+        print("Predicted position is: {}".format(predicted_position))
+        print("Predicted positions size: {}".format(predicted_position.size()))
 
         predicted_angle = predicted_angle.reshape(body_parms_pred['pose_body'].shape[0],-1,3)                    
         gt_angle = gt_angle.reshape(body_parms_gt['pose_body'].shape[0],-1,3)
