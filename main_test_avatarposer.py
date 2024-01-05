@@ -109,15 +109,20 @@ def main(json_path='options/test_avatarposer.json'):
     pos_error = []
     vel_error = []
     pos_error_hands = []
-
     for index, test_data in enumerate(test_loader):
+        if index > 3: 
+    	    break
         logger.info("testing the sample {}/{}".format(index, len(test_loader)))
+        
+        # Evaluate present test data 
+        print(test_data)
 
         model.feed_data(test_data, test=True)
 
         model.test()
 
         body_parms_pred = model.current_prediction()
+        print("body params gt: {}".format(body_params_pred))
         body_parms_gt = model.current_gt()
         predicted_angle = body_parms_pred['pose_body']
         predicted_position = body_parms_pred['position']
@@ -159,8 +164,6 @@ def main(json_path='options/test_avatarposer.json'):
         vel_error.append(vel_error_)
 
         pos_error_hands.append(pos_error_hands_)
-
-
 
     pos_error = sum(pos_error)/len(pos_error)
     vel_error = sum(vel_error)/len(vel_error)

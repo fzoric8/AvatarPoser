@@ -1,0 +1,4 @@
+name: avatarPoser
+channels:
+  - defaults
+prefix: /home/zozan-server/anaconda3/envs/avatarPoser
